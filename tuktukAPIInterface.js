@@ -98,7 +98,7 @@ async function addRide(_ride_id, _datetime, _destination,_from, _destination_lat
     });
 }
 
-async function clickOnRides(_ride_id){
+async function getRideInfo(_ride_id){
     additionalParams={
         queryParams:{
             ride_id:_ride_id
@@ -196,7 +196,7 @@ async function rideListSearch(){
 
 module.exports={
     addRide,
-    clickOnRides,
+    getRideInfo,
     deleteRide,
     getUserRides,
     modifyRide,
