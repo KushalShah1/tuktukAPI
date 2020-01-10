@@ -70,7 +70,7 @@ var body = {
 async function addRide(_ride_id, _datetime, _destination,_from, _destination_lat,_destination_long, _from_lat,_from_long, _seats, _users_joined,_description, _traction, _price, _safety_features,_driver_id, _car ){
     additionalParams={
         queryParams:{
-            rideId:_ride_id,
+            ride_id:_ride_id,
             datetime: _datetime,
             destination: _description,
             destination_lat:_destination_lat,
@@ -101,7 +101,7 @@ async function addRide(_ride_id, _datetime, _destination,_from, _destination_lat
 async function clickOnRides(_ride_id){
     additionalParams={
         queryParams:{
-            rideId:_ride_id
+            ride_id:_ride_id
         }
     }
     return await apigClient.invokeApi(pathParams, pathTemplate+'/clickonrides', 'GET', additionalParams, body)
@@ -114,8 +114,91 @@ async function clickOnRides(_ride_id){
     });
 }
 
+async function deleteRide(_ride_id){
+    additionalParams={
+        queryParams:{
+            ride_id:_ride_id
+        }
+    }
+    return await apigClient.invokeApi(pathParams, pathTemplate+'/deleteride', 'DELETE', additionalParams, body)
+    .then(function(result){
+        return(result.data);
+        //This is where you would put a success callback
+    }).catch(function(result){
+        //This is where you would put an error callback
+        return(result);
+    });
+}
 
-clickOnRides(1).then(data=>{
-    console.log(data);
-});
 
+async function getUserRides(_driver_id){
+    additionalParams={
+        queryParams:{
+            driver_id:_driver_id
+        }
+    }
+    return await apigClient.invokeApi(pathParams, pathTemplate+'/getuserrides', 'GET', additionalParams, body)
+    .then(function(result){
+        return(result.data);
+        //This is where you would put a success callback
+    }).catch(function(result){
+        //This is where you would put an error callback
+        return(result);
+    });
+}
+
+async function modifyRide(_ride_id, _datetime, _destination,_from, _destination_lat,_destination_long, _from_lat,_from_long, _seats, _users_joined,_description, _traction, _price, _safety_features,_driver_id, _car ){
+    additionalParams={
+        queryParams:{
+            ride_id:_ride_id,
+            datetime: _datetime,
+            destination: _description,
+            destination_lat:_destination_lat,
+            destination_long:_destination_long,
+            from: _from,
+            from_lat:_from_lat,
+            from_long:_from_long,
+            seats:_seats,
+            users_joined:_users_joined,
+            description:_description,
+            traction:_traction,
+            price:_price,
+            safety_features:_safety_features,
+            driver_id:_driver_id,
+            car:_car
+        }
+    }
+    return await apigClient.invokeApi(pathParams, pathTemplate+'/modifyride', 'PUT', additionalParams, body)
+    .then(function(result){
+        return(result.data);
+        //This is where you would put a success callback
+    }).catch( function(result){
+        //This is where you would put an error callback
+        return(result);
+    });
+}
+
+async function rideListSearch(){
+    return await apigClient.invokeApi(pathParams, pathTemplate+'/ridelistsearch', 'GET', additionalParams, body)
+    .then(function(result){
+        return(result.data);
+        //This is where you would put a success callback
+    }).catch(function(result){
+        //This is where you would put an error callback
+        return(result);
+    });
+}
+
+
+// clickOnRides(1).then(data=>{
+//     console.log(data);
+// });
+
+module.exports={
+    addRide,
+    clickOnRides,
+    deleteRide,
+    getUserRides,
+    modifyRide,
+    rideListSearch
+}

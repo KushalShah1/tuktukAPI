@@ -124,14 +124,86 @@ exports.handler = (event, context, callback) => {
     else if (event.resource === '/getuserinfo' && event.httpMethod === 'GET') {
     }
     else if (event.resource === '/getuserrides' && event.httpMethod === 'GET') {
+        let driverId = event.queryStringParameters.driverId;
+        pool.getConnection(function (err, connection) {
+            if (err) {
+                console.log("failed connection");
+            }
+            // Use the connection
+            connection.query('SELECT * from data.Rides WHERE driver_id='+ driverId, function (error, results, fields) {
+                // And done with the connection.
+                connection.release();
+                // Handle error after the release.
+                if (error) status = 2;
+                else status = 200;
+                response = {
+                    "statusCode": status,
+                    "headers": {
+                        "my_header": "my_value"
+                    },
+                    "body": JSON.stringify(results),
+                    "isBase64Encoded": false
+                };
+                console.log("response: " + JSON.stringify(response))
+                callback(null, response)
+            });
+        });
     }
     else if (event.resource === '/joinride' && event.httpMethod === 'PUT') {
     }
     else if (event.resource === '/modifytrip' && event.httpMethod === 'PUT') {
-    }
-    else if (event.resource === '/modifyuserinfo' && event.httpMethod === 'PUT') {
-    }
-    else if (event.resource === '/ridelistsearch' && event.httpMethod === 'GET') {
+        let queryParams="";
+        let ride_id=0;
+        for (var x in event.queryStringParameters) {
+            if(x==="ride_id"){
+                ride_id=event.queryStringParameters[x];
+            }
+            else{
+                queryParams+=x+"="+event.queryStringParameters[x]+"\n";
+            }
+        }
+        
+        pool.getConnection(function (err, connection) {
+            if (err) {
+                console.log("failed connection");
+                callback(null, {
+                    "statusCode": 401,
+                    "headers": {
+                        "my_header": "my_value"
+                    },
+                    "body": "Could Not Connect to Database",
+                    "isBase64Encoded": false
+                })
+            }
+            // Use the connection
+            connection.query('UPDATE data.Rides SET'+queryParams+'WHERE ride_id='+ride_id, function (error, results, fields) {
+                // And done with the connection.
+                connection.release();
+                // Handle error after the release.
+                if (error) {
+                    callback(null, {
+                        "statusCode": 401,
+                        "headers": {
+                            "my_header": "my_value"
+                        },
+                        "body": JSON.stringify(error),
+                        "isBase64Encoded": false
+                    })
+                }
+                else status = 200;
+
+                response = {
+                    "statusCode": status,
+                    "headers": {
+                        "my_header": "my_value"
+                    },
+                    "body": JSON.stringify(results),
+                    "isBase64Encoded": false
+                };
+                console.log("response: " + JSON.stringify(response))
+                callback(null, response)
+            });
+        });
     }
     else if (event.resource === '/ridelistsearch/trendingrides' && event.httpMethod === 'GET') {
     }
@@ -144,7 +216,7 @@ exports.handler = (event, context, callback) => {
             "body": "Invalid API Call",
             "isBase64Encoded": false
         };
-
+        callback(null, response);
     }
 
 }
