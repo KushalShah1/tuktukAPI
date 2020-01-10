@@ -190,7 +190,7 @@ async function rideListSearch(){
 }
 
 
-// clickOnRides(1).then(data=>{
+// rideListSearch().then(data=>{
 //     console.log(data);
 // });
 

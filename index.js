@@ -11,13 +11,13 @@ exports.handler = (event, context, callback) => {
     let response = {};
     let status = 200;
     if (event.resource === '/clickonrides' && event.httpMethod === 'GET') {
-        let rideId = event.queryStringParameters.rideId;
+        let ride_id =event.queryStringParameters.ride_id;
         pool.getConnection(function (err, connection) {
             if (err) {
                 console.log("failed connection");
             }
             // Use the connection
-            connection.query('SELECT * from data.Rides where ride_id=' + rideId, function (error, results, fields) {
+            connection.query('SELECT * from data.Rides where ride_id=' + ride_id, function (error, results, fields) {
                 // And done with the connection.
                 connection.release();
                 // Handle error after the release.
@@ -93,13 +93,13 @@ exports.handler = (event, context, callback) => {
 
     }
     else if (event.resource === '/deleteride' && event.httpMethod === 'DELETE') {
-        let rideId = event.queryStringParameters.rideId;
+        let ride_id = event.queryStringParameters.ride_id;
         pool.getConnection(function (err, connection) {
             if (err) {
                 console.log("failed connection");
             }
             // Use the connection
-            connection.query('DELETE from data.Rides where ride_id=' + rideId, function (error, results, fields) {
+            connection.query('DELETE from data.Rides where ride_id=' + ride_id, function (error, results, fields) {
                 // And done with the connection.
                 connection.release();
                 // Handle error after the release.
@@ -124,13 +124,13 @@ exports.handler = (event, context, callback) => {
     else if (event.resource === '/getuserinfo' && event.httpMethod === 'GET') {
     }
     else if (event.resource === '/getuserrides' && event.httpMethod === 'GET') {
-        let driverId = event.queryStringParameters.driverId;
+        let driver_id = event.queryStringParameters.driver_id;
         pool.getConnection(function (err, connection) {
             if (err) {
                 console.log("failed connection");
             }
             // Use the connection
-            connection.query('SELECT * from data.Rides WHERE driver_id='+ driverId, function (error, results, fields) {
+            connection.query('SELECT * from data.Rides WHERE driver_id='+ driver_id, function (error, results, fields) {
                 // And done with the connection.
                 connection.release();
                 // Handle error after the release.
