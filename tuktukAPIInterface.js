@@ -71,8 +71,8 @@ async function addRide(_ride_id, _datetime, _destination,_from, _destination_lat
     additionalParams={
         queryParams:{
             ride_id:_ride_id,
-            datetime: _datetime,
-            destination: _description,
+            datetime:_datetime,
+            destination: _destination,
             destination_lat:_destination_lat,
             destination_long:_destination_long,
             from: _from,
@@ -88,6 +88,7 @@ async function addRide(_ride_id, _datetime, _destination,_from, _destination_lat
             car:_car
         }
     }
+    
     return await apigClient.invokeApi(pathParams, pathTemplate+'/addride', 'POST', additionalParams, body)
     .then(function(result){
         return(result.data);
@@ -152,7 +153,7 @@ async function modifyRide(_ride_id, _datetime, _destination,_from, _destination_
         queryParams:{
             ride_id:_ride_id,
             datetime: _datetime,
-            destination: _description,
+            destination: _destination,
             destination_lat:_destination_lat,
             destination_long:_destination_long,
             from: _from,
@@ -192,7 +193,9 @@ async function rideListSearch(){
 
 // rideListSearch().then(data=>{
 //     console.log(data);
-// });
+// }).catch(err=>{
+//     console.log(err);
+// })
 
 module.exports={
     addRide,
