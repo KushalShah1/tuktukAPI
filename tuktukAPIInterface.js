@@ -191,11 +191,11 @@ async function rideListSearch(){
 }
 
 
-// rideListSearch().then(data=>{
-//     console.log(data);
-// }).catch(err=>{
-//     console.log(err);
-// })
+rideListSearch().then(data=>{
+    console.log(data);
+}).catch(err=>{
+    console.log(err);
+})
 
 module.exports={
     addRide,
