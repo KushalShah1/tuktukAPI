@@ -35,6 +35,7 @@
 var apigClientFactory = require('aws-api-gateway-client').default;
 config = {invokeUrl:'https://jbhhfznzg4.execute-api.us-east-1.amazonaws.com'}
 var apigClient = apigClientFactory.newClient(config);
+var {uuid}=require('uuidv4');
 
 var pathParams = {
     //This is where path request params go. 
@@ -67,10 +68,9 @@ var body = {
 //     });
 
 //ride_id= 4& datetime='2020-01-01T10:10:10.000Z'&destination= 'HEB'& from='West Campus'& destination_lat= 10.12&destination_long= 12.13&from_lat=99.99999999&from_long= 2.4444&seats= 4 &users_joined= 2&description='Test Ride'&traction= 0&price= 3.52&safety_features= null &driver_id= 2332 &car='corolla' 
-async function addRide(_ride_id, _datetime, _destination,_from, _destination_lat,_destination_long, _from_lat,_from_long, _seats, _users_joined,_description, _traction, _price, _safety_features,_driver_id, _car ){
+async function addRide(_datetime, _destination,_from, _destination_lat,_destination_long, _from_lat,_from_long, _seats, _users_joined,_description, _traction, _price, _safety_features,_driver_id, _car ){
     additionalParams={
         queryParams:{
-            ride_id:_ride_id,
             datetime:_datetime,
             destination: _destination,
             destination_lat:_destination_lat,
@@ -191,11 +191,17 @@ async function rideListSearch(){
 }
 
 
-rideListSearch().then(data=>{
-    console.log(data);
-}).catch(err=>{
-    console.log(err);
-})
+// rideListSearch().then(data=>{
+//     console.log(data);
+// }).catch(err=>{
+//     console.log(err);
+// })
+
+// getRideInfo("ffe8427c-12da-426f-aff1-a4a73162f99b").then(data=>{
+//     console.log(data);
+// }).catch(err=>{
+//     console.log(err);
+// })
 
 module.exports={
     addRide,
