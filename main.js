@@ -151,7 +151,7 @@ exports.handler = (event, context, callback) => {
                     })
                 }
                 usersAlreadyThere = results[0].users_joined;
-                users = usersAlreadyThere.split(',');
+                let users = usersAlreadyThere.split(',');
                 for (var i = 0; i < users.length; i++) {
                     if (users[i] === userToDelete) {
                         users.splice(i, 1);
@@ -369,6 +369,30 @@ exports.handler = (event, context, callback) => {
         });
     }
     else if (event.resource === '/ridelistsearch/trendingrides' && event.httpMethod === 'GET') {
+        let num=event.queryStringParameters.num;
+        pool.getConnection(function (err, connection) {
+            if (err) {
+                console.log("failed connection");
+            }
+            // Use the connection
+            connection.query('SELECT * FROM prod.Rides ORDER BY traction DESC LIMIT '+num, function (error, results, fields) {
+                // And done with the connection.
+                connection.release();
+                // Handle error after the release.
+                if (error) status = 2;
+                else status = 200;
+                response = {
+                    "statusCode": status,
+                    "headers": {
+                        "my_header": "my_value"
+                    },
+                    "body": JSON.stringify(results),
+                    "isBase64Encoded": false
+                };
+                console.log("response: " + JSON.stringify(response))
+                callback(null, response)
+            });
+        });
     }
     else {
         response = {

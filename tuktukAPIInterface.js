@@ -79,7 +79,6 @@ async function addRide(_datetime, _destination,_from, _destination_lat,_destinat
             from_lat:_from_lat,
             from_long:_from_long,
             seats:_seats,
-            users_joined:null,
             description:_description,
             traction:_traction,
             price:_price,
@@ -190,6 +189,22 @@ async function rideListSearch(){
     });
 }
 
+async function trendingRideListSearch(number){
+    additionalParams={
+        queryParams:{
+            num:number
+        }
+    }
+    return await apigClient.invokeApi(pathParams, pathTemplate+'/ridelistsearch/trendingrides', 'GET', additionalParams, body)
+    .then(function(result){
+        return(result.data);
+        //This is where you would put a success callback
+    }).catch(function(result){
+        //This is where you would put an error callback
+        return(result);
+    });
+}
+
 async function joinRide(_ride_id,_user_id){
     additionalParams={
         queryParams:{
@@ -237,13 +252,17 @@ async function deleteUserFromRide(_ride_id,_user_id){
 //     console.log(err);
 // })
 
-// joinRide('23d73e70-22db-4264-a1e7-baa22d27f989',Math.floor(Math.random()*100)).then(data=>{
+// joinRide('1654026f-d462-401e-bbfe-b49997c4d78c',Math.floor(Math.random()*100)).then(data=>{
 //     console.log(data);
 // })
 
-// deleteUserFromRide('23d73e70-22db-4264-a1e7-baa22d27f989', 82).then(data=>{
+// deleteUserFromRide('1654026f-d462-401e-bbfe-b49997c4d78c', 82).then(data=>{
 //     console.log(data);
 // });
+
+// trendingRideListSearch(10).then(data=>{
+//     console.log(data);
+// })
 
 module.exports={
     addRide,
