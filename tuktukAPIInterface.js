@@ -68,7 +68,7 @@ var body = {
 //     });
 
 //ride_id= 4& datetime='2020-01-01T10:10:10.000Z'&destination= 'HEB'& from='West Campus'& destination_lat= 10.12&destination_long= 12.13&from_lat=99.99999999&from_long= 2.4444&seats= 4 &users_joined= 2&description='Test Ride'&traction= 0&price= 3.52&safety_features= null &driver_id= 2332 &car='corolla' 
-async function addRide(_datetime, _destination,_from, _destination_lat,_destination_long, _from_lat,_from_long, _seats, _users_joined,_description, _traction, _price, _safety_features,_driver_id, _car ){
+async function addRide(_datetime, _destination,_from, _destination_lat,_destination_long, _from_lat,_from_long, _seats,_description, _traction, _price, _safety_features,_driver_id, _car ){
     additionalParams={
         queryParams:{
             datetime:_datetime,
@@ -79,7 +79,7 @@ async function addRide(_datetime, _destination,_from, _destination_lat,_destinat
             from_lat:_from_lat,
             from_long:_from_long,
             seats:_seats,
-            users_joined:_users_joined,
+            users_joined:null,
             description:_description,
             traction:_traction,
             price:_price,
@@ -190,6 +190,40 @@ async function rideListSearch(){
     });
 }
 
+async function joinRide(_ride_id,_user_id){
+    additionalParams={
+        queryParams:{
+            ride_id:_ride_id,
+            user_id:_user_id
+        }
+    }
+    return await apigClient.invokeApi(pathParams, pathTemplate+'/joinride', 'PUT', additionalParams, body)
+    .then(function(result){
+        return(result.data);
+        //This is where you would put a success callback
+    }).catch( function(result){
+        //This is where you would put an error callback
+        return(result);
+    });
+}
+
+async function deleteUserFromRide(_ride_id,_user_id){
+    additionalParams={
+        queryParams:{
+            ride_id:_ride_id,
+            user_id:_user_id
+        }
+    }
+    return await apigClient.invokeApi(pathParams, pathTemplate+'/deleteuserfromride', 'DELETE', additionalParams, body)
+    .then(function(result){
+        return(result.data);
+        //This is where you would put a success callback
+    }).catch( function(result){
+        //This is where you would put an error callback
+        return(result);
+    });
+}
+
 
 // rideListSearch().then(data=>{
 //     console.log(data);
@@ -203,11 +237,21 @@ async function rideListSearch(){
 //     console.log(err);
 // })
 
+// joinRide('23d73e70-22db-4264-a1e7-baa22d27f989',Math.floor(Math.random()*100)).then(data=>{
+//     console.log(data);
+// })
+
+// deleteUserFromRide('23d73e70-22db-4264-a1e7-baa22d27f989', 82).then(data=>{
+//     console.log(data);
+// });
+
 module.exports={
     addRide,
     getRideInfo,
     deleteRide,
     getUserRides,
     modifyRide,
-    rideListSearch
+    rideListSearch,
+    joinRide,
+    deleteUserFromRide
 }
