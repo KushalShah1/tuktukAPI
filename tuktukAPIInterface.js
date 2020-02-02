@@ -1,37 +1,3 @@
-// var http = require('http');
-
-// var options={
-//     host:'jbhhfznzg4.execute-api.us-east-1.amazonaws.com',
-//     port:80,
-//     path:'/Initial_Development/getuserrides',
-//     method: 'GET'
-// }
-// function getJSON(options, cb){
-//     http.request(options,function(res){
-//         var body='';
-//         res.on('data',function(chunk){
-//             body+=chunk;
-//         });
-
-//         res.on('end',function(chunk){
-//             var obj=JSON.parse(body);
-//             cb(null,obj);
-//         });
-
-//         res.on('error',cb);
-
-//     })
-//     .on('error', cb)
-//     .end();
-// }
-
-// getJSON(options, function(err,result){
-//     if(err){
-//         return console.log(err);
-//     }
-//     console.log(result);
-// })
-
 var apigClientFactory = require('aws-api-gateway-client').default;
 config = { invokeUrl: 'https://jbhhfznzg4.execute-api.us-east-1.amazonaws.com' }
 var apigClient = apigClientFactory.newClient(config);
@@ -129,7 +95,6 @@ async function deleteRide(_ride_id) {
             return (result);
         });
 }
-
 
 async function getUserRides(_driver_id) {
     additionalParams = {
@@ -263,6 +228,79 @@ async function addRideRequest(_datetime, _destination, _from, _destination_lat, 
             return (result);
         });
 }
+
+async function addUser(user_sub, profile_pic_url, _gender){
+    additionalParams = {
+        queryParams: {
+            user_id:user_sub,
+            profile_pic:profile_pic_url,
+            gender:_gender,
+            rating:0.0
+        }
+    }
+
+    return await apigClient.invokeApi(pathParams, pathTemplate + '/adduser', 'POST', additionalParams, body)
+        .then(function (result) {
+            return (result.data);
+            //This is where you would put a success callback
+        }).catch(function (result) {
+            //This is where you would put an error callback
+            return (result);
+        });
+}
+
+async function modifyUser(user_sub, profile_pic_url, _gender,_rating){
+    additionalParams = {
+        queryParams: {
+            user_id:user_sub,
+            profile_pic:profile_pic_url,
+            gender:_gender,
+            rating:_rating
+        }
+    }
+
+    return await apigClient.invokeApi(pathParams, pathTemplate + '/modifyuserinfo', 'PUT', additionalParams, body)
+        .then(function (result) {
+            return (result.data);
+            //This is where you would put a success callback
+        }).catch(function (result) {
+            //This is where you would put an error callback
+            return (result);
+        });
+}
+
+async function getUserInfo(user_sub){
+    additionalParams = {
+        queryParams: {
+            user_id:user_sub
+        }
+    }
+    return await apigClient.invokeApi(pathParams, pathTemplate + '/getuserinfo', 'GET', additionalParams, body)
+        .then(function (result) {
+            return (result.data);
+            //This is where you would put a success callback
+        }).catch(function (result) {
+            //This is where you would put an error callback
+            return (result);
+        });
+}
+
+async function deleteUser(user_sub){
+    additionalParams = {
+        queryParams: {
+            user_id:user_sub
+        }
+    }
+    return await apigClient.invokeApi(pathParams, pathTemplate + '/deleteuser', 'DELETE', additionalParams, body)
+        .then(function (result) {
+            return (result.data);
+            //This is where you would put a success callback
+        }).catch(function (result) {
+            //This is where you would put an error callback
+            return (result);
+        });
+}
+
 // var buffer = require('buffer');
 // var path = require('path');
 // var fs = require('fs');
@@ -303,36 +341,6 @@ async function addRideRequest(_datetime, _destination, _from, _destination_lat, 
 
 // }
 
-// rideListSearch().then(data=>{
-//     console.log(data);
-// }).catch(err=>{
-//     console.log(err);
-// })
-
-// getRideInfo("ffe8427c-12da-426f-aff1-a4a73162f99b").then(data=>{
-//     console.log(data);
-// }).catch(err=>{
-//     console.log(err);
-// })
-
-// joinRide('1654026f-d462-401e-bbfe-b49997c4d78c',Math.floor(Math.random()*100)).then(data=>{
-//     console.log(data);
-// })
-
-// deleteUserFromRide('1654026f-d462-401e-bbfe-b49997c4d78c', 82).then(data=>{
-//     console.log(data);
-// });
-
-// trendingRideListSearch(10).then(data=>{
-//     console.log(data);
-// })
-
-// uploadProfilePicture('./coin.jpg').then(data => {
-//     console.log(data);
-// }).catch(err => {
-//     console.log(err);
-// });
-
 module.exports = {
     addRide,
     getRideInfo,
@@ -341,5 +349,10 @@ module.exports = {
     modifyRide,
     rideListSearch,
     joinRide,
-    deleteUserFromRide
+    deleteUserFromRide,
+    addRideRequest,
+    addUser,
+    getUserInfo,
+    modifyUser,
+    deleteUser
 }

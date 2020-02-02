@@ -190,8 +190,6 @@ exports.handler = (event, context, callback) => {
             });
         });
     }
-    else if (event.resource === '/getuserinfo' && event.httpMethod === 'GET') {
-    }
     else if (event.resource === '/getuserrides' && event.httpMethod === 'GET') {
         let driver_id = event.queryStringParameters.driver_id;
         pool.getConnection(function (err, connection) {
@@ -341,8 +339,6 @@ exports.handler = (event, context, callback) => {
             });
         });
     }
-    else if (event.resource === '/modifyuserinfo' && event.httpMethod === 'PUT') {
-    }
     else if (event.resource === '/ridelistsearch' && event.httpMethod === 'GET') {
         pool.getConnection(function (err, connection) {
             if (err) {
@@ -393,6 +389,60 @@ exports.handler = (event, context, callback) => {
                 callback(null, response)
             });
         });
+    }
+    else if (event.resource === '/addriderequest' && event.httpMethod === 'POST') {
+        let value = "";
+        let columns = "";
+        for (var x in event.queryStringParameters) {
+            columns += '`' + x + '`';
+            columns += ",";
+            value += '"' + event.queryStringParameters[x] + '"';
+            value += ",";
+        }
+        value = value.substring(0, value.length - 1);
+        columns = columns.substring(0, columns.length - 1);
+        pool.getConnection(function (err, connection) {
+            if (err) {
+                console.log("failed connection");
+                callback(null, {
+                    "statusCode": 401,
+                    "headers": {
+                        "my_header": "my_value"
+                    },
+                    "body": "Could Not Connect to Database",
+                    "isBase64Encoded": false
+                })
+            }
+            // Use the connection
+            connection.query('INSERT INTO `prod`.`RideRequests` (`ride_id`,' + columns + ') VALUES ("' + uuid() + '",' + value + ')', function (error, results, fields) {
+                // And done with the connection.
+                connection.release();
+                // Handle error after the release.
+                if (error) {
+                    callback(null, {
+                        "statusCode": 401,
+                        "headers": {
+                            "my_header": "my_value"
+                        },
+                        "body": JSON.stringify(error),
+                        "isBase64Encoded": false
+                    })
+                }
+                else status = 200;
+
+                response = {
+                    "statusCode": status,
+                    "headers": {
+                        "my_header": "my_value"
+                    },
+                    "body": JSON.stringify(results),
+                    "isBase64Encoded": false
+                };
+                console.log("response: " + JSON.stringify(response))
+                callback(null, response)
+            });
+        });
+
     }
     else {
         response = {
