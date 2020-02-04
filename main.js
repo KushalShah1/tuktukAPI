@@ -119,7 +119,6 @@ exports.handler = (event, context, callback) => {
                 callback(null, response)
             });
         });
-
     }
     else if (event.resource === '/deleteuserfromride' && event.httpMethod === 'DELETE') {
         let ride_id = event.queryStringParameters.ride_id;
@@ -443,6 +442,87 @@ exports.handler = (event, context, callback) => {
             });
         });
 
+    }
+    else if (event.resource === '/deleteriderequest' && event.httpMethod === 'DELETE'){
+        let ride_id = event.queryStringParameters.ride_id;
+        pool.getConnection(function (err, connection) {
+            if (err) {
+                console.log("failed connection");
+            }
+            // Use the connection
+            connection.query('DELETE from prod.RideRequests where ride_id="' + ride_id + '"', function (error, results, fields) {
+                // And done with the connection.
+                connection.release();
+                // Handle error after the release.
+                if (error) status = 2;
+                else status = 200;
+                response = {
+                    "statusCode": status,
+                    "headers": {
+                        "my_header": "my_value"
+                    },
+                    "body": JSON.stringify(results),
+                    "isBase64Encoded": false
+                };
+                console.log("response: " + JSON.stringify(response))
+                callback(null, response)
+            });
+        });
+    }
+    else if (event.resource === '/modifyriderequest' && event.httpMethod === 'PUT') {
+        let queryParams = "";
+        let ride_id = 0;
+        for (var x in event.queryStringParameters) {
+            if (x === "ride_id") {
+                ride_id = event.queryStringParameters[x];
+            }
+            else {
+                queryParams += x + "=" + event.queryStringParameters[x] + ",";
+            }
+        }
+        queryParams = queryParams.substring(0, queryParams.length - 1)
+
+        pool.getConnection(function (err, connection) {
+            if (err) {
+                console.log("failed connection");
+                callback(null, {
+                    "statusCode": 401,
+                    "headers": {
+                        "my_header": "my_value"
+                    },
+                    "body": "Could Not Connect to Database",
+                    "isBase64Encoded": false
+                })
+            }
+            // Use the connection
+            connection.query('UPDATE prod.RideRequests SET ' + queryParams + 'WHERE ride_id="' + ride_id + '"', function (error, results, fields) {
+                // And done with the connection.
+                connection.release();
+                // Handle error after the release.
+                if (error) {
+                    callback(null, {
+                        "statusCode": 401,
+                        "headers": {
+                            "my_header": "my_value"
+                        },
+                        "body": JSON.stringify(error),
+                        "isBase64Encoded": false
+                    })
+                }
+                else status = 200;
+
+                response = {
+                    "statusCode": status,
+                    "headers": {
+                        "my_header": "my_value"
+                    },
+                    "body": JSON.stringify(results),
+                    "isBase64Encoded": false
+                };
+                console.log("response: " + JSON.stringify(response))
+                callback(null, response)
+            });
+        });
     }
     else {
         response = {

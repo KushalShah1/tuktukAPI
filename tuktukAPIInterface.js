@@ -301,6 +301,46 @@ async function deleteUser(user_sub){
         });
 }
 
+async function deleteRideRequest(_ride_id){
+    additionalParams = {
+        queryParams: {
+            ride_id: _ride_id
+        }
+    }
+    return await apigClient.invokeApi(pathParams, pathTemplate + '/deleteriderequest', 'DELETE', additionalParams, body)
+        .then(function (result) {
+            return (result.data);
+            //This is where you would put a success callback
+        }).catch(function (result) {
+            //This is where you would put an error callback
+            return (result);
+        });
+}
+
+async function modifyRideRequest(_datetime, _destination, _from, _destination_lat, _destination_long, _from_lat, _from_long, _description, _price) {
+    additionalParams = {
+        queryParams: {
+            datetime: _datetime,
+            destination: _destination,
+            destination_lat: _destination_lat,
+            destination_long: _destination_long,
+            from: _from,
+            from_lat: _from_lat,
+            from_long: _from_long,
+            description: _description,
+            price:_price
+        }
+    }
+
+    return await apigClient.invokeApi(pathParams, pathTemplate + '/modifyriderequest', 'PUT', additionalParams, body)
+        .then(function (result) {
+            return (result.data);
+            //This is where you would put a success callback
+        }).catch(function (result) {
+            //This is where you would put an error callback
+            return (result);
+        });
+}
 // var buffer = require('buffer');
 // var path = require('path');
 // var fs = require('fs');
@@ -354,5 +394,8 @@ module.exports = {
     addUser,
     getUserInfo,
     modifyUser,
-    deleteUser
+    deleteUser,
+    trendingRideListSearch,
+    deleteRideRequest,
+    modifyRideRequest
 }
