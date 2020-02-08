@@ -4,6 +4,7 @@ var pool = mysql.createPool({
     host: config.dbhost,
     user: config.dbuser,
     password: config.dbpassword,
+    database:'prod',
 });
 var { uuid } = require('uuidv4');
 
@@ -339,12 +340,13 @@ exports.handler = (event, context, callback) => {
         });
     }
     else if (event.resource === '/ridelistsearch' && event.httpMethod === 'GET') {
+        let destination = event.queryStringParameters.destination;
         pool.getConnection(function (err, connection) {
             if (err) {
                 console.log("failed connection");
             }
             // Use the connection
-            connection.query('SELECT * from prod.Rides', function (error, results, fields) {
+            connection.query('SELECT * FROM prod.Rides WHERE levenshtein_ratio("'+destination+'", `destination`) BETWEEN 75 AND 100', function (error, results, fields) {
                 // And done with the connection.
                 connection.release();
                 // Handle error after the release.

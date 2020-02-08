@@ -143,7 +143,12 @@ async function modifyRide(_ride_id, _datetime, _destination, _from, _destination
         });
 }
 
-async function rideListSearch() {
+async function rideListSearch(_destination) {
+    additionalParams = {
+        queryParams: {
+            destination: _destination
+        }
+    }
     return await apigClient.invokeApi(pathParams, pathTemplate + '/ridelistsearch', 'GET', additionalParams, body)
         .then(function (result) {
             return (result.data);
@@ -381,6 +386,9 @@ async function modifyRideRequest(_datetime, _destination, _from, _destination_la
 
 // }
 
+//rideListSearch('Wamart').then(data=>{console.log(data)});
+
+//getRideInfo('30a39505-b45e-4a6f-ab7c-7243847e8da2').then(data=>{console.log(data)});
 module.exports = {
     addRide,
     getRideInfo,
