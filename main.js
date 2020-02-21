@@ -4,9 +4,30 @@ var pool = mysql.createPool({
     host: config.dbhost,
     user: config.dbuser,
     password: config.dbpassword,
-    database:'prod',
+    database: 'prod',
 });
+
+
 var { uuid } = require('uuidv4');
+var failConDB = {
+    "statusCode": 500,
+    "headers": {
+        "my_header": "my_value"
+    },
+    "body": "Failed Connection to Database",
+    "isBase64Encoded": false
+};
+
+var failQuery = {
+    "statusCode": 500,
+    "headers": {
+        "my_header": "my_value"
+    },
+    "body": "Failed Query",
+    "isBase64Encoded": false
+};
+
+
 
 exports.handler = (event, context, callback) => {
     //prevent timeout from waiting event loop
@@ -17,17 +38,18 @@ exports.handler = (event, context, callback) => {
         let ride_id = event.queryStringParameters.ride_id;
         pool.getConnection(function (err, connection) {
             if (err) {
-                console.log("failed connection");
+                callback(null, failConDB)
             }
             // Use the connection
-            connection.query('SELECT * from prod.Rides where ride_id="' + ride_id + '"', function (error, results, fields) {
+            connection.query('SELECT * FROM prod.Rides INNER JOIN Users ON Rides.driver_id=Users.user_id where ride_id="' + ride_id + '"', function (error, results, fields) {
                 // And done with the connection.
                 connection.release();
                 // Handle error after the release.
-                if (error) status = 2;
-                else status = 200;
+                if (error) {
+                    callback(null, failQuery)
+                }
                 response = {
-                    "statusCode": status,
+                    "statusCode": 200,
                     "headers": {
                         "my_header": "my_value"
                     },
@@ -55,14 +77,7 @@ exports.handler = (event, context, callback) => {
         pool.getConnection(function (err, connection) {
             if (err) {
                 console.log("failed connection");
-                callback(null, {
-                    "statusCode": 401,
-                    "headers": {
-                        "my_header": "my_value"
-                    },
-                    "body": "Could Not Connect to Database",
-                    "isBase64Encoded": false
-                })
+                callback(err, failConDB);
             }
             // Use the connection
             connection.query('INSERT INTO `prod`.`Rides` (`ride_id`,' + columns + ') VALUES ("' + uuid() + '",' + value + ')', function (error, results, fields) {
@@ -70,19 +85,11 @@ exports.handler = (event, context, callback) => {
                 connection.release();
                 // Handle error after the release.
                 if (error) {
-                    callback(null, {
-                        "statusCode": 401,
-                        "headers": {
-                            "my_header": "my_value"
-                        },
-                        "body": JSON.stringify(error),
-                        "isBase64Encoded": false
-                    })
+                    callback(error, failQuery);
                 }
-                else status = 200;
 
                 response = {
-                    "statusCode": status,
+                    "statusCode": 200,
                     "headers": {
                         "my_header": "my_value"
                     },
@@ -99,17 +106,18 @@ exports.handler = (event, context, callback) => {
         let ride_id = event.queryStringParameters.ride_id;
         pool.getConnection(function (err, connection) {
             if (err) {
-                console.log("failed connection");
+                callback(err, failConDB);
             }
             // Use the connection
             connection.query('DELETE from prod.Rides where ride_id="' + ride_id + '"', function (error, results, fields) {
                 // And done with the connection.
                 connection.release();
                 // Handle error after the release.
-                if (error) status = 2;
-                else status = 200;
+                if (error) {
+                    callback(error, failQuery);
+                }
                 response = {
-                    "statusCode": status,
+                    "statusCode": 200,
                     "headers": {
                         "my_header": "my_value"
                     },
@@ -128,27 +136,13 @@ exports.handler = (event, context, callback) => {
         pool.getConnection(function (err, connection) {
             if (err) {
                 console.log("failed connection");
-                callback(null, {
-                    "statusCode": 200,
-                    "headers": {
-                        "my_header": "my_value"
-                    },
-                    "body": "Could Not Connect to Database",
-                    "isBase64Encoded": false
-                })
+                callback(err, failConDB);
             }
             connection.query('SELECT users_joined FROM prod.Rides WHERE ride_id="' + ride_id + '"', function (error, results, fields) {
                 // And done with the connection.
                 // Handle error after the release.
                 if (error) {
-                    callback(null, {
-                        "statusCode": 200,
-                        "headers": {
-                            "my_header": "my_value"
-                        },
-                        "body": JSON.stringify(error),
-                        "isBase64Encoded": false
-                    })
+                    callback(error, failQuery);
                 }
                 usersAlreadyThere = results[0].users_joined;
                 let users = usersAlreadyThere.split(',');
@@ -157,7 +151,7 @@ exports.handler = (event, context, callback) => {
                         users.splice(i, 1);
                     }
                 }
-                usersAlreadyThere=users.join();
+                usersAlreadyThere = users.join();
 
                 // Use the connection
                 connection.query('UPDATE prod.Rides SET users_joined="' + usersAlreadyThere + '" WHERE ride_id="' + ride_id + '"', function (error, results, fields) {
@@ -166,7 +160,7 @@ exports.handler = (event, context, callback) => {
                     // Handle error after the release.
                     if (error) {
                         callback(null, {
-                            "statusCode": 401,
+                            "statusCode": 500,
                             "headers": {
                                 "my_header": "my_value"
                             },
@@ -194,14 +188,16 @@ exports.handler = (event, context, callback) => {
         let driver_id = event.queryStringParameters.driver_id;
         pool.getConnection(function (err, connection) {
             if (err) {
-                console.log("failed connection");
+                callback(err, failConDB);
             }
             // Use the connection
             connection.query('SELECT * from prod.Rides WHERE driver_id="' + driver_id + '"', function (error, results, fields) {
                 // And done with the connection.
                 connection.release();
                 // Handle error after the release.
-                if (error) status = 2;
+                if (error) {
+                    callback(error, failQuery);
+                }
                 else status = 200;
                 response = {
                     "statusCode": status,
@@ -223,27 +219,13 @@ exports.handler = (event, context, callback) => {
         pool.getConnection(function (err, connection) {
             if (err) {
                 console.log("failed connection");
-                callback(null, {
-                    "statusCode": 200,
-                    "headers": {
-                        "my_header": "my_value"
-                    },
-                    "body": "Could Not Connect to Database",
-                    "isBase64Encoded": false
-                })
+                callback(null, failConDB);
             }
             connection.query('SELECT users_joined FROM prod.Rides WHERE ride_id="' + ride_id + '"', function (error, results, fields) {
                 // And done with the connection.
                 // Handle error after the release.
                 if (error) {
-                    callback(null, {
-                        "statusCode": 200,
-                        "headers": {
-                            "my_header": "my_value"
-                        },
-                        "body": JSON.stringify(error),
-                        "isBase64Encoded": false
-                    })
+                    callback(null, failQuery)
                 }
                 usersAlreadyThere = results[0].users_joined;
                 if (!usersAlreadyThere) {
@@ -259,14 +241,7 @@ exports.handler = (event, context, callback) => {
                     connection.release();
                     // Handle error after the release.
                     if (error) {
-                        callback(null, {
-                            "statusCode": 401,
-                            "headers": {
-                                "my_header": "my_value"
-                            },
-                            "body": JSON.stringify(error),
-                            "isBase64Encoded": false
-                        })
+                        callback(error, failQuery);
                     }
                     else status = 200;
 
@@ -300,14 +275,7 @@ exports.handler = (event, context, callback) => {
         pool.getConnection(function (err, connection) {
             if (err) {
                 console.log("failed connection");
-                callback(null, {
-                    "statusCode": 401,
-                    "headers": {
-                        "my_header": "my_value"
-                    },
-                    "body": "Could Not Connect to Database",
-                    "isBase64Encoded": false
-                })
+                callback(err, failConDB);
             }
             // Use the connection
             connection.query('UPDATE prod.Rides SET ' + queryParams + 'WHERE ride_id="' + ride_id + '"', function (error, results, fields) {
@@ -315,14 +283,7 @@ exports.handler = (event, context, callback) => {
                 connection.release();
                 // Handle error after the release.
                 if (error) {
-                    callback(null, {
-                        "statusCode": 401,
-                        "headers": {
-                            "my_header": "my_value"
-                        },
-                        "body": JSON.stringify(error),
-                        "isBase64Encoded": false
-                    })
+                    callback(error, failQuery);
                 }
                 else status = 200;
 
@@ -343,14 +304,16 @@ exports.handler = (event, context, callback) => {
         let destination = event.queryStringParameters.destination;
         pool.getConnection(function (err, connection) {
             if (err) {
-                console.log("failed connection");
+                callback(err, failConDB);
             }
             // Use the connection
-            connection.query('SELECT * FROM prod.Rides WHERE levenshtein_ratio("'+destination+'", `destination`) BETWEEN 75 AND 100', function (error, results, fields) {
+            connection.query('SELECT * FROM prod.Rides WHERE levenshtein_ratio("' + destination + '", `destination`) BETWEEN 75 AND 100', function (error, results, fields) {
                 // And done with the connection.
                 connection.release();
                 // Handle error after the release.
-                if (error) status = 2;
+                if (error) {
+                    callback(error, failQuery);
+                }
                 else status = 200;
                 response = {
                     "statusCode": status,
@@ -366,17 +329,19 @@ exports.handler = (event, context, callback) => {
         });
     }
     else if (event.resource === '/ridelistsearch/trendingrides' && event.httpMethod === 'GET') {
-        let num=event.queryStringParameters.num;
+        let num = event.queryStringParameters.num;
         pool.getConnection(function (err, connection) {
             if (err) {
-                console.log("failed connection");
+                callback(err, failConDB);
             }
             // Use the connection
-            connection.query('SELECT * FROM prod.Rides ORDER BY traction DESC LIMIT '+num, function (error, results, fields) {
+            connection.query('SELECT * FROM prod.Rides ORDER BY traction DESC LIMIT ' + num, function (error, results, fields) {
                 // And done with the connection.
                 connection.release();
                 // Handle error after the release.
-                if (error) status = 2;
+                if (error) {
+                    callback(error, failQuery);
+                }
                 else status = 200;
                 response = {
                     "statusCode": status,
@@ -405,14 +370,7 @@ exports.handler = (event, context, callback) => {
         pool.getConnection(function (err, connection) {
             if (err) {
                 console.log("failed connection");
-                callback(null, {
-                    "statusCode": 401,
-                    "headers": {
-                        "my_header": "my_value"
-                    },
-                    "body": "Could Not Connect to Database",
-                    "isBase64Encoded": false
-                })
+                callback(err, failConDB);
             }
             // Use the connection
             connection.query('INSERT INTO `prod`.`RideRequests` (`ride_id`,' + columns + ') VALUES ("' + uuid() + '",' + value + ')', function (error, results, fields) {
@@ -420,14 +378,7 @@ exports.handler = (event, context, callback) => {
                 connection.release();
                 // Handle error after the release.
                 if (error) {
-                    callback(null, {
-                        "statusCode": 401,
-                        "headers": {
-                            "my_header": "my_value"
-                        },
-                        "body": JSON.stringify(error),
-                        "isBase64Encoded": false
-                    })
+                    callback(error, failQuery);
                 }
                 else status = 200;
 
@@ -445,18 +396,20 @@ exports.handler = (event, context, callback) => {
         });
 
     }
-    else if (event.resource === '/deleteriderequest' && event.httpMethod === 'DELETE'){
+    else if (event.resource === '/deleteriderequest' && event.httpMethod === 'DELETE') {
         let ride_id = event.queryStringParameters.ride_id;
         pool.getConnection(function (err, connection) {
             if (err) {
-                console.log("failed connection");
+                callback(err, failConDB);
             }
             // Use the connection
             connection.query('DELETE from prod.RideRequests where ride_id="' + ride_id + '"', function (error, results, fields) {
                 // And done with the connection.
                 connection.release();
                 // Handle error after the release.
-                if (error) status = 2;
+                if (error) {
+                    callback(error, failQuery);
+                }
                 else status = 200;
                 response = {
                     "statusCode": status,
@@ -487,14 +440,7 @@ exports.handler = (event, context, callback) => {
         pool.getConnection(function (err, connection) {
             if (err) {
                 console.log("failed connection");
-                callback(null, {
-                    "statusCode": 401,
-                    "headers": {
-                        "my_header": "my_value"
-                    },
-                    "body": "Could Not Connect to Database",
-                    "isBase64Encoded": false
-                })
+                callback(err, failConDB);
             }
             // Use the connection
             connection.query('UPDATE prod.RideRequests SET ' + queryParams + 'WHERE ride_id="' + ride_id + '"', function (error, results, fields) {
@@ -502,14 +448,7 @@ exports.handler = (event, context, callback) => {
                 connection.release();
                 // Handle error after the release.
                 if (error) {
-                    callback(null, {
-                        "statusCode": 401,
-                        "headers": {
-                            "my_header": "my_value"
-                        },
-                        "body": JSON.stringify(error),
-                        "isBase64Encoded": false
-                    })
+                    callback(error, failQuery);
                 }
                 else status = 200;
 

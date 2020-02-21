@@ -5,7 +5,8 @@ let datetime= '2020-01-01T10:10:10';
 let description= 'Wowza a description';
 
 for (let i = 0; i < 20; i++) {
-    api.addUser(Math.floor(Math.random()*1000), "None", "Male").then(data=>{
-        console.log(data);
+    let rand=Math.random();
+    api.addRide(datetime,destinations[Math.floor(rand*destinations.length)],from[Math.floor(rand*from.length)], Math.floor(rand*100), Math.floor(rand*100), Math.floor(rand*200), Math.floor(rand*200), Math.floor(rand*6), description, Math.floor(rand*50), Math.floor(rand*10),null,Math.floor(rand*300), 'corolla').then(res=>{
+        console.log(res);
     })
 }

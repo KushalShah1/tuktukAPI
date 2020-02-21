@@ -386,7 +386,7 @@ async function modifyRideRequest(_datetime, _destination, _from, _destination_la
 
 // }
 
-//rideListSearch('Wamart').then(data=>{console.log(data)});
+rideListSearch('texas').then(data=>{console.log(data)});
 
 //getRideInfo('30a39505-b45e-4a6f-ab7c-7243847e8da2').then(data=>{console.log(data)});
 module.exports = {
