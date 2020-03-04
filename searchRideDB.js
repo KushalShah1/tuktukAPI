@@ -58,36 +58,51 @@ exports.handler = (event, context, callback) => {
                 callback(error, failQuery);
             }
             else {
-                try {
-                    for (let i = 0; i < results.length; i++) {
-                        cognito.adminGetUser({
-                            UserPoolId: "us-east-1_IVvtM8Ze2",
-                            Username: results[i].driver_id,
-                        }).promise().then(user => {
-                            user.UserAttributes.forEach(function (val) {
-                                results[i][val.Name] = val.Value;
+                if (results.length > 0) {
+                    const getUser= async()=>{
+                        await asyncForEach(results, async (res)=>{
+                            await cognito.adminGetUser({
+                                UserPoolId: "us-east-1_IVvtM8Ze2",
+                                Username: res.driver_id,
+                            }).promise().then(user => {
+                                user.UserAttributes.forEach(function (val) {
+                                    res[val.Name] = val.Value;
+                                })
                             })
-
-                            response = {
-                                "statusCode": status,
-                                "headers": {
-                                    "my_header": "my_value"
-                                },
-                                "body": JSON.stringify(results),
-                                "isBase64Encoded": false
-                            };
-                            console.log("response: " + JSON.stringify(response))
-                            callback(null, response);
-
-                        }).catch(err => {
-                            console.log(err);
                         })
+                        response = {
+                            "statusCode": status,
+                            "headers": {
+                                "my_header": "my_value"
+                            },
+                            "body": JSON.stringify(results),
+                            "isBase64Encoded": false
+                        };
+                        console.log("response: " + JSON.stringify(response))
+                        callback(null, response);
                     }
+
+                    getUser();
                 }
-                catch{
-                    callback(null, failQuery);
+                else {
+                    response = {
+                        "statusCode": status,
+                        "headers": {
+                            "my_header": "my_value"
+                        },
+                        "body": JSON.stringify(results),
+                        "isBase64Encoded": false
+                    };
+                    console.log("response: " + JSON.stringify(response))
+                    callback(null, response);
                 }
             }
         });
     });
 }
+
+async function asyncForEach(array, callback) {
+    for (let index = 0; index < array.length; index++) {
+      await callback(array[index]);
+    }
+  }
