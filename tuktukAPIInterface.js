@@ -1,7 +1,10 @@
+var axios = require('axios');
+var fs = require('fs');
+var FormData = require('form-data');
+var path= require('path');
 var apigClientFactory = require('aws-api-gateway-client').default;
 config = { invokeUrl: 'https://jbhhfznzg4.execute-api.us-east-1.amazonaws.com' }
 var apigClient = apigClientFactory.newClient(config);
-var { uuid } = require('uuidv4');
 
 var pathParams = {
     //This is where path request params go. 
@@ -234,11 +237,11 @@ async function addRideRequest(_datetime, _destination, _from, _destination_lat, 
         });
 }
 
-async function addUser(user_sub, profile_pic_url, _gender){
+async function addUser(user_sub, profile_pic_path, _gender){
     additionalParams = {
         queryParams: {
             user_id:user_sub,
-            profile_pic:profile_pic_url,
+            profile_pic:profile_pic_path,
             gender:_gender,
             rating:0.0
         }
@@ -254,11 +257,11 @@ async function addUser(user_sub, profile_pic_url, _gender){
         });
 }
 
-async function modifyUser(user_sub, profile_pic_url, _gender,_rating){
+async function modifyUser(user_sub, profile_pic_path, _gender,_rating){
     additionalParams = {
         queryParams: {
             user_id:user_sub,
-            profile_pic:profile_pic_url,
+            profile_pic:profile_pic_path,
             gender:_gender,
             rating:_rating
         }
@@ -346,49 +349,59 @@ async function modifyRideRequest(_datetime, _destination, _from, _destination_la
             return (result);
         });
 }
-// var buffer = require('buffer');
-// var path = require('path');
-// var fs = require('fs');
-// var util = require('util');
-// const readFile = util.promisify(fs.readFile)
-// function encode_base64(filename) {
-//     fs.readFile(filename, (error, data) => {
-//         if (error) {
-//             throw error;
-//         }
-//         else {
-//             var buf = Buffer.from(data);
-//             var base64 = buf.toString('base64');
-//             //console.log('Base64 of ddr.jpg :' + base64);
-//             return base64;
-//         }
-//     });
-// }
 
-// async function uploadProfilePicture(filename) {
-//     data = fs.readFileSync(filename, 'utf8');
-//     var buf = Buffer.from(data);
-//     var base64 = buf.toString('base64');
+async function uploadProfilePicture(_user_id, localImage) {
+    let file = fs.readFileSync(localImage);
+    additionalParams = {
+        queryParams: {
+            user_id: _user_id,
+            image_name : _user_id+path.extname(localImage),
 
+        }
+    }
+    return await apigClient.invokeApi(pathParams, pathTemplate + '/getSignedURLfortuktukS3', 'GET', additionalParams, body)
+        .then(function (result) {
+            const config = {
+                headers: {
+                    'Content-Type': 'image'
+                  }
+            };
+
+            let fd = new FormData();
+            fd.append("image", file, _user_id);
+
+
+            return axios.put(result.data, file, config)
+                .then(res => {return "https://tuktukpics.s3.amazonaws.com/"+_user_id+path.extname(localImage)})
+                .catch(err => {return "Upload Failed"});
+
+        }).catch(function (result) {
+            //This is where you would put an error callback
+            return (result);
+        });
+}
+
+// async function getURLforProPic(_user_id,localImagePath){
 //     additionalParams = {
 //         queryParams: {
-//             user_avatar: base64
+//             image_name: _user_id+path.extname(localImagePath)
 //         }
 //     }
-//     return await apigClient.invokeApi(pathParams, pathTemplate + '/uploadtos3', 'POST', additionalParams, body)
+//     return await apigClient.invokeApi(pathParams, pathTemplate + '/geturlforpic', 'GET', additionalParams, body)
 //         .then(function (result) {
-//             return (result);
+//             return (result.data);
 //             //This is where you would put a success callback
 //         }).catch(function (result) {
 //             //This is where you would put an error callback
 //             return (result);
 //         });
-
 // }
 
-rideListSearch('texas').then(data=>{console.log(data)});
+//rideListSearch('Pcvhhbjbjb').then(data=>{console.log(data)});
 
-//getRideInfo('30a39505-b45e-4a6f-ab7c-7243847e8da2').then(data=>{console.log(data)});
+uploadProfilePicture('f41d39cc-4c52-4ad6-9b48-0ce716e5246a',"C:\\Users\\kusha\\Pictures\\download.jfif").then(data=>{console.log(data)});
+
+//trendingRideListSearch(2).then(data=>{console.log(data)});
 module.exports = {
     addRide,
     getRideInfo,
@@ -405,5 +418,6 @@ module.exports = {
     deleteUser,
     trendingRideListSearch,
     deleteRideRequest,
-    modifyRideRequest
+    modifyRideRequest,
+    uploadProfilePicture
 }
